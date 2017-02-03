@@ -26,7 +26,7 @@ public class Jewels {
      *
      */
 
-    private HashMap<String, String[]> stateEdgeMap;
+    private HashMap<String, String[]> stateAdjMap;
     private HashSet<String> visited;
 
     private String startState;
@@ -45,7 +45,8 @@ public class Jewels {
     };
 
     public Jewels(String startState, String goalState) {
-        stateEdgeMap = new HashMap<>();
+        stateAdjMap = new HashMap<>();
+        visited = new HashSet<>();
         this.startState = startState;
         this.endState = goalState;
     }
@@ -54,14 +55,15 @@ public class Jewels {
         //System.out.println("Hello World!");
 
         String startState = "DDDDDDDDD";
-        String goalState = "";
+        String goalState = "DRRDDRDDD";
 
         Jewels j = new Jewels(startState, goalState);
+        j.generate();
 
         System.out.println( j.depthFirst() );
-        System.out.println( j.bestFirst() );
+        // System.out.println( j.bestFirst() );
 
-        j.generate();
+
     }
 
     public void generate() {
@@ -71,14 +73,14 @@ public class Jewels {
         while (!openQueue.isEmpty()) {
 
             String stateToEval = openQueue.remove();
-            if (!stateEdgeMap.containsKey(stateToEval)) {
+            if (!stateAdjMap.containsKey(stateToEval)) {
                 String[] children = generateChildren(stateToEval);
                 Collections.addAll(openQueue, children);
-                stateEdgeMap.put(stateToEval, children);
+                stateAdjMap.put(stateToEval, children);
             }
         }
-        System.out.println(stateEdgeMap.size());
-        System.out.println(Arrays.toString(stateEdgeMap.get(startState)));
+        System.out.println(stateAdjMap.size());
+        System.out.println(Arrays.toString(stateAdjMap.get(startState)));
     }
 
     private String[] generateChildren(String parentState) {
@@ -119,11 +121,40 @@ public class Jewels {
     }
 
     private String depthFirst() {
-        String solution = "";
 
-        // Some more stuff here...
+        ArrayDeque<Integer> route = new ArrayDeque<>();
+        ArrayDeque<String> stack = new ArrayDeque<>();
+        visited.clear();
 
-        return solution;
+        String currentState = startState;
+        visited.add(currentState);
+        while (!currentState.equals(endState)){
+            boolean openNodeFound = false;
+            String[] children = stateAdjMap.get(currentState);
+            for (int i = 0; i < children.length; i++){
+                if (!visited.contains(children[i])){
+                    route.push(i);
+                    stack.push(children[i]);
+                    visited.add(children[i]);
+                    currentState = children[i];
+                    openNodeFound = true;
+                    break;
+                }
+            }
+            if (openNodeFound)
+                continue;
+
+            if (route.isEmpty())
+                return "No solution found.";
+
+            route.pop();
+            currentState = stack.pop();
+        }
+        String soln = "";
+        while (!route.isEmpty()){
+            soln += route.removeLast() + " ";
+        }
+        return "Solution found: " + soln;
     }
 
 }
