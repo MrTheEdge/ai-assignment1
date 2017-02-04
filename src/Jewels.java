@@ -55,17 +55,40 @@ public class Jewels {
         //System.out.println("Hello World!");
 
         String startState = "DDDDDDDDD";
-        String goalState = "DRRDDRDDD";
+        String goalState = "RRERERERR";
 
         Jewels j = new Jewels(startState, goalState);
         j.generate();
 
-        System.out.println( j.depthFirst() );
-        // System.out.println( j.bestFirst() );
+        // System.out.println( j.depthFirst() );
 
+        String solution = j.bestFirst();
 
+        // Simulating the found path to test if the result is correct.
+        String currentState = startState;
+        String[] pathPos = solution.split(" ");
+        for (int i = 0; i < pathPos.length; i++){
+            int pos = Integer.parseInt(pathPos[i]);
+            currentState = apply(currentState, pos);
+        }
+        System.out.println("Simulated: " + currentState + " Expected: " + goalState + " Equal?: " + currentState.equals(goalState));
     }
 
+    // Takes a state as a string and applies a move corresponding to the given position.
+    public static String apply(String state, int pos){
+        StringBuilder sb = new StringBuilder(state);
+
+        for (int i = 0; i < jewelChanges[pos].length; i++){
+            int charPos = jewelChanges[pos][i];
+            char c = getNextChar( sb.charAt(charPos) );
+
+            sb.setCharAt(jewelChanges[pos][i], c);
+        }
+
+        return sb.toString();
+    }
+
+    // Generates all possible states
     public void generate() {
         ArrayDeque<String> openQueue = new ArrayDeque<>();
         openQueue.add(startState);
@@ -79,10 +102,25 @@ public class Jewels {
                 stateAdjMap.put(stateToEval, children);
             }
         }
-        System.out.println(stateAdjMap.size());
-        System.out.println(Arrays.toString(stateAdjMap.get(startState)));
+        //System.out.println(stateAdjMap.size());
+        //System.out.println(Arrays.toString(stateAdjMap.get(startState)));
     }
 
+    // Returns the character that the given character will change to with one move
+    public static char getNextChar(char c){
+        switch(c) {
+            case 'D':
+                return 'R';
+            case 'R':
+                return 'E';
+            case 'E':
+                return 'D';
+            default:
+                throw new IllegalArgumentException("Uhh... sumtin rong");
+        }
+    }
+
+    // Generates the child states of a given state representation.
     private String[] generateChildren(String parentState) {
         StringBuilder charSeq;
         String[] children = new String[9];
@@ -90,20 +128,7 @@ public class Jewels {
             charSeq = new StringBuilder(parentState);
 
             for (int j = 0; j < jewelChanges[i].length; j++){
-                char c = charSeq.charAt(jewelChanges[i][j]);
-                switch (c) {
-                    case 'D':
-                        c = 'R';
-                        break;
-                    case 'R':
-                        c = 'E';
-                        break;
-                    case 'E':
-                        c = 'D';
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Uhh... sumtin rong");
-                }
+                char c = getNextChar( charSeq.charAt(jewelChanges[i][j]) );
                 charSeq.setCharAt(jewelChanges[i][j], c);
             }
 
@@ -112,14 +137,69 @@ public class Jewels {
         return children;
     }
 
+    // Finds a solution and returns the path based on a heuristic. Factors in distance
+    // so that if a state is revisited, it will choose the one with a shorter distance.
     private String bestFirst() {
-        String solution = "";
+        PriorityQueue<State> open = new PriorityQueue<>(new HeuristicComp());
+        HashSet<State> closed = new HashSet<>();
+        HashMap<State, Integer> distances = new HashMap<>();
 
-        // Do stuff here...
+        State currentState = new State(startState, -1);
+        open.add(currentState);
+        distances.put(currentState, 0);
 
-        return solution;
+        while(!open.isEmpty()){
+
+            currentState = open.poll();
+            int currentDistance = distances.get(currentState);
+            if (currentState.equals(endState)) return findPath(currentState);
+
+            String[] children = stateAdjMap.get(currentState.jewels);
+
+            for (int i = 0; i < children.length; i++){
+                State childState = new State(children[i], i);
+                childState.setParent(currentState);
+                boolean onOpen = open.contains(childState);
+                boolean onClosed = closed.contains(childState);
+                if (!onOpen && !onClosed){
+                    open.add(childState);
+                    distances.put(childState, currentDistance+1);
+                } else if (onOpen) {
+                    if (distances.get(childState) > currentDistance + 1){
+                        open.remove(childState); // .equals() doesn't care about info other than string
+                        open.add(childState); // Changes to state with parent that has shorter distance (and pos value)
+                    }
+                } else { // onClosed == true
+                    if (distances.get(childState) > currentDistance + 1){
+                        closed.remove(childState);
+                        open.add(childState);
+                    }
+                }
+            }
+            closed.add(currentState);
+        }
+        return "Best-First Solution not found.";
+
     }
 
+    // Takes the current state from best first search and returns a string representation of the path
+    // from the start state to the current state.
+    private String findPath(State currentState) {
+        ArrayDeque<Integer> path = new ArrayDeque<>();
+
+        while (currentState.getParent() != null){ // Prevents printing -1 from the start node
+            path.push(currentState.pos);
+            currentState = currentState.getParent();
+        }
+        String positionPath = "";
+        while (!path.isEmpty()){
+            positionPath += path.pop() + " ";
+        }
+
+        return positionPath;
+    }
+
+    // Finds a path to the goal node via a depth first search.
     private String depthFirst() {
 
         ArrayDeque<Integer> route = new ArrayDeque<>();
@@ -145,7 +225,7 @@ public class Jewels {
                 continue;
 
             if (route.isEmpty())
-                return "No solution found.";
+                return "No Dept-First solution found.";
 
             route.pop();
             currentState = stack.pop();
@@ -154,10 +234,10 @@ public class Jewels {
         while (!route.isEmpty()){
             soln += route.removeLast() + " ";
         }
-        return "Solution found: " + soln;
+        return soln;
     }
 
-
+    // Comparator for use in a priority queue to order smaller priorities first.
     private class HeuristicComp implements Comparator<State> {
 
         @Override
@@ -166,6 +246,8 @@ public class Jewels {
         }
     }
 
+    // Currently only used in the best first search. Stores the heuristic weight, along with the states
+    //  parent state and which position was chosen to generate the state.
     private class State {
 
         private String jewels;
@@ -177,31 +259,41 @@ public class Jewels {
             this.jewels = jewels;
             this.pos = pos;
 
-            StringBuilder tmpCurrent = new StringBuilder(jewels);
-            StringBuilder tmpGoal = new StringBuilder(endState);
+            calcHeuristic();
+
+        }
+
+        // Calculates a heuristic value for a state based on how close each letter is to the goal letter.
+        // The heuristic is a sum of the scores of all 9 jewels.
+        // If the jewel is equal to the jewel in that position in the goal state, add 0;
+        // If the jewel is 1 step away from the jewel in the goal state, add 1;
+        // If the jewel is 2 steps away from the jewel in the goal state, add 2;
+        // This amounts to the lowest possible heuristic being 0 (as in the goal state),
+        //  or 18 if every jewel is 2 steps away from the final state.
+        private void calcHeuristic(){
             int tmpweight = 0;
-            for (int i=0;i<tmpCurrent.length();i++)
+            for (int i=0;i<jewels.length();i++)
             {
-                char c = tmpCurrent.charAt(i);
+                char c = jewels.charAt(i);
                 switch (c) {
                     case 'D':
-                        if (tmpGoal.charAt(i) == 'R')
+                        if (endState.charAt(i) == 'R')
                             tmpweight +=1;
-                        else if (tmpGoal.charAt(i) == 'E')
+                        else if (endState.charAt(i) == 'E')
                             tmpweight +=2;
                         //if D, add nothing
                         break;
                     case 'R':
-                        if (tmpGoal.charAt(i) == 'E')
+                        if (endState.charAt(i) == 'E')
                             tmpweight +=1;
-                        else if (tmpGoal.charAt(i) == 'D')
+                        else if (endState.charAt(i) == 'D')
                             tmpweight +=2;
                         //if R, add nothing
                         break;
                     case 'E':
-                        if (tmpGoal.charAt(i) == 'D')
+                        if (endState.charAt(i) == 'D')
                             tmpweight +=1;
-                        else if (tmpGoal.charAt(i) == 'R')
+                        else if (endState.charAt(i) == 'R')
                             tmpweight +=2;
                         //if E, add nothing
                         break;
@@ -210,7 +302,6 @@ public class Jewels {
                 }
             }
             this.weight = tmpweight; //minimum of 0 when == to goal node, max 18 if all nodes two steps away
-
         }
 
         public int getWeight() {
@@ -223,6 +314,31 @@ public class Jewels {
 
         public void setParent(State parent) { //parent must be set externally!
             this.parent = parent;
+        }
+
+        // For use in the priority queue when searching for a state. The only attribute that we care about
+        // is the string representation of the state.
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            } else if (obj instanceof String) {
+                String s = (String) obj;
+                return jewels.equals(s);
+            } else if (obj instanceof State){
+                State s = (State) obj;
+                // Compare the data members and return accordingly
+                return jewels.equals(s.jewels);
+            } else {
+                return false;
+            }
+        }
+
+        // For use in data structures like a HashSet or HashMap. The only attribute that matters is the
+        // string representation of the state.
+        @Override
+        public int hashCode() {
+            return jewels.hashCode();
         }
     }
 }
