@@ -157,4 +157,64 @@ public class Jewels {
         return "Solution found: " + soln;
     }
 
+
+    private class State {
+
+        private String jewels;
+        private int weight;
+        private State parent = null; //set externally, null by default to not break method calls
+        private int pos; //position flipped to get this state
+
+        public State(String jewels, int pos){
+            this.jewels = jewels;
+            this.pos = pos;
+
+            StringBuilder tmpCurrent = new StringBuilder(jewels);
+            StringBuilder tmpGoal = new StringBuilder(endState);
+            int tmpweight = 0;
+            for (int i=0;i<tmpCurrent.length();i++)
+            {
+                char c = tmpCurrent.charAt(i);
+                switch (c) {
+                    case 'D':
+                        if (tmpGoal.charAt(i) == 'R')
+                            tmpweight +=1;
+                        else if (tmpGoal.charAt(i) == 'E')
+                            tmpweight +=2;
+                        //if D, add nothing
+                        break;
+                    case 'R':
+                        if (tmpGoal.charAt(i) == 'E')
+                            tmpweight +=1;
+                        else if (tmpGoal.charAt(i) == 'D')
+                            tmpweight +=2;
+                        //if R, add nothing
+                        break;
+                    case 'E':
+                        if (tmpGoal.charAt(i) == 'D')
+                            tmpweight +=1;
+                        else if (tmpGoal.charAt(i) == 'R')
+                            tmpweight +=2;
+                        //if E, add nothing
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Sumtin verwy wong!");
+                }
+            }
+            this.weight = tmpweight; //minimum of 0 when == to goal node, max 18 if all nodes two steps away
+
+        }
+
+        public int getWeight() {
+            return weight;
+        }
+
+        public State getParent() {
+            return parent;
+        }
+
+        public void setParent(State parent) { //parent must be set externally!
+            this.parent = parent;
+        }
+    }
 }
