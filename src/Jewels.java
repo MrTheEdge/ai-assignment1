@@ -60,10 +60,17 @@ public class Jewels {
         Jewels j = new Jewels(startState, goalState);
         j.generate();
 
-        // System.out.println( j.depthFirst() );
+        String dfSolution = j.depthFirst();
+        System.out.println("Depth First: " + dfSolution );
+        simulate(startState, goalState, dfSolution);
 
-        String solution = j.bestFirst();
+        String bfSolution = j.bestFirst();
+        System.out.println("Best First: " + bfSolution);
+        simulate(startState, goalState, bfSolution);
 
+    }
+
+    public static void simulate(String startState, String goalState, String solution){
         // Simulating the found path to test if the result is correct.
         String currentState = startState;
         String[] pathPos = solution.split(" ");
