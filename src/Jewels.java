@@ -158,6 +158,14 @@ public class Jewels {
     }
 
 
+    private class HeuristicComp implements Comparator<State> {
+
+        @Override
+        public int compare(State o1, State o2) {
+            return o1.getWeight() - o2.getWeight();
+        }
+    }
+
     private class State {
 
         private String jewels;
