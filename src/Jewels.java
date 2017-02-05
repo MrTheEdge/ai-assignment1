@@ -1,38 +1,36 @@
 import java.util.*;
 
 /**
- * Created by EJ on 1/28/2017.
+ * E.J. Schroeder
+ * Matt Moellman
+ * CSC 425 - Programming Assignment 1
+ *
+ * * Given a start state and end state
+ * Diamond -> Ruby -> Emerald -> Diamond
+ * D D D     E E E
+ * D D D ==> E E E
+ * D D D     E E E
+ *
+ * Starting Grid: DDD DDD DDD
+ * Position     Result          Modifies
+ *      0       RRD RDD DDD     0,1,3
+ *      1       RRR DRD DDD     0,1,2,4
+ *      2       DRR DDR DDD     1,2,5
+ *      3       RDD RRD RDD     0,3,4,6
+ *      4       DRD RRR DRD     1,3,4,5,7
+ *      5       DDR DRR DDR     2,4,5,8
+ *      6       DDD RDD RRD     3,6,7
+ *      7       DDD DRD RRR     4,6,7,8
+ *      8       DDD DDR DRR     5,7,8
  */
 public class Jewels {
-
-    /**
-     * Given a start state and end state
-     * Diamond -> Ruby -> Emerald -> Diamond
-     * D D R     E E E
-     * D D D --> E E E
-     * D D D     E E E
-     *
-     * Starting Grid: DDD DDD DDD
-     * Position     Result          Modifies
-     *      0       RRD RDD DDD     0,1,3
-     *      1       RRR DRD DDD     0,1,2,4
-     *      2       DRR DDR DDD     1,2,5
-     *      3       RDD RRD RDD     0,3,4,6
-     *      4       DRD RRR DRD     1,3,4,5,7
-     *      5       DDR DRR DDR     2,4,5,8
-     *      6       DDD RDD RRD     3,6,7
-     *      7       DDD DRD RRR     4,6,7,8
-     *      8       DDD DDR DRR     5,7,8
-     *
-     */
-
-    private HashSet<String> visited;
 
     private String startState;
     private String endState;
 
     private int totalVisits = 0;
 
+    // An array of which positions change when a grid position is chosen
     private static final int[][] jewelChanges = new int[][]{
             {0,1,3},
             {0,1,2,4},
@@ -46,67 +44,88 @@ public class Jewels {
     };
 
     public Jewels(String startState, String goalState) {
-        visited = new HashSet<>();
         this.startState = startState;
         this.endState = goalState;
     }
 
     public static void main(String[] args){
 
-        String startState = "DDDDDDDDD"; //Test 1
+        /*
+            Test Case 1:
+                D D D     E E R
+                D D D ==> E R E
+                D D D     R E R
+         */
+        String startState = "DDDDDDDDD";
         String goalState = "EERERERER";
 
         Jewels j = new Jewels(startState, goalState);
 
-        String dfSolution = j.depthFirst();
-        System.out.println("Depth First: " + dfSolution );
-        simulate(startState, goalState, dfSolution);
-        System.out.println("Total visits: " + j.totalVisits);
+        int[] dfSolution = j.depthFirst();
+        System.out.println("DFS Solution: " + Arrays.toString(dfSolution));
+        //simulate(startState, goalState, dfSolution);
+        System.out.println("Total DFS Visits: " + j.totalVisits);
 
-        String bfSolution = j.bestFirst();
-        System.out.println("Best First: " + bfSolution);
-        simulate(startState, goalState, bfSolution);
-        System.out.println("Total visits: " + j.totalVisits);
+        int[] bfSolution = j.bestFirst();
+        System.out.println("BestFS Solution: " + Arrays.toString(bfSolution));
+        //simulate(startState, goalState, bfSolution);
+        System.out.println("Total BestFS Visits: " + j.totalVisits);
+        System.out.println();
 
-        startState = "DDDDDDDDD"; //Test 2
+        /*
+            Test Case 2:
+                D D D     R R E
+                D D D ==> R E R
+                D D D     E R R
+         */
+
+        startState = "DDDDDDDDD";
         goalState =  "RRERERERR";
 
         j = new Jewels(startState, goalState);
 
         dfSolution = j.depthFirst();
-        System.out.println("Depth First: " + dfSolution );
-        simulate(startState, goalState, dfSolution);
-        System.out.println("Total visits: " + j.totalVisits);
+        System.out.println("DFS Solution: " + Arrays.toString(dfSolution));
+        //simulate(startState, goalState, dfSolution);
+        System.out.println("Total DFS Visits: " + j.totalVisits);
 
         bfSolution = j.bestFirst();
-        System.out.println("Best First: " + bfSolution);
-        simulate(startState, goalState, bfSolution);
-        System.out.println("Total visits: " + j.totalVisits);
+        System.out.println("BestFS Solution: " + Arrays.toString(bfSolution));
+        //simulate(startState, goalState, bfSolution);
+        System.out.println("Total BestFS Visits: " + j.totalVisits);
+        System.out.println();
 
-        startState = "DDDDDDDDD"; //Test 3
+        /*
+            Test Case 3:
+                D D D     R D R
+                D D D ==> D R D
+                D D D     R D R
+         */
+
+        startState = "DDDDDDDDD";
         goalState =  "RDRDRDRDR";
 
         j = new Jewels(startState, goalState);
 
         dfSolution = j.depthFirst();
-        System.out.println("Depth First: " + dfSolution );
-        simulate(startState, goalState, dfSolution);
-        System.out.println("Total visits: " + j.totalVisits);
+        System.out.println("DFS Solution: " + Arrays.toString(dfSolution));
+        //simulate(startState, goalState, dfSolution);
+        System.out.println("Total DFS Visits: " + j.totalVisits);
 
         bfSolution = j.bestFirst();
-        System.out.println("Best First: " + bfSolution);
-        simulate(startState, goalState, bfSolution);
-        System.out.println("Total visits: " + j.totalVisits);
+        System.out.println("BestFS Solution: " + Arrays.toString(bfSolution));
+        //simulate(startState, goalState, bfSolution);
+        System.out.println("Total BestFS Visits: " + j.totalVisits);
+        System.out.println();
 
     }
 
-    public static void simulate(String startState, String goalState, String solution){
+    // Used as a test to see if the result from DFS and BestFS actually solve the puzzle.
+    public static void simulate(String startState, String goalState, int[] solution){
         // Simulating the found path to test if the result is correct.
         String currentState = startState;
-        String[] pathPos = solution.split(" ");
-        for (int i = 0; i < pathPos.length; i++){
-            int pos = Integer.parseInt(pathPos[i]);
-            currentState = apply(currentState, pos);
+        for (int i = 0; i < solution.length; i++){
+            currentState = apply(currentState, solution[i]);
         }
         System.out.println("Simulated: " + currentState + " Expected: " + goalState + " Equal?: " + currentState.equals(goalState));
     }
@@ -118,14 +137,13 @@ public class Jewels {
         for (int i = 0; i < jewelChanges[pos].length; i++){
             int charPos = jewelChanges[pos][i];
             char c = getNextChar( sb.charAt(charPos) );
-
             sb.setCharAt(jewelChanges[pos][i], c);
         }
 
         return sb.toString();
     }
 
-    // Returns the character that the given character will change to with one move
+    // Returns the character that corresponds with the next jewel in the sequence
     public static char getNextChar(char c){
         switch(c) {
             case 'D':
@@ -158,10 +176,11 @@ public class Jewels {
 
     // Finds a solution and returns the path based on a heuristic. Factors in distance
     // so that if a state is revisited, it will choose the one with a shorter distance.
-    private String bestFirst() {
+    private int[] bestFirst() {
+        // Priority queue will order its contents based on a heuristic value
         PriorityQueue<State> open = new PriorityQueue<>(new HeuristicComp());
         HashSet<State> closed = new HashSet<>();
-        HashMap<State, Integer> distances = new HashMap<>();
+        HashMap<State, Integer> distances = new HashMap<>(); // Store current total distances to nodes
         this.totalVisits = 0; //set total number of nodes visited counter to 0
 
         State currentState = new State(startState, -1);
@@ -171,19 +190,22 @@ public class Jewels {
         while(!open.isEmpty()){
 
             currentState = open.poll();
+            this.totalVisits +=1; //increment counter of visited nodes
             int currentDistance = distances.get(currentState);
+            // If the goal state is found, generate the path from start to goal
             if (currentState.equals(endState)) return findPath(currentState);
 
             String[] children = generateChildren(currentState.jewels);
 
             for (int i = 0; i < children.length; i++){
+                // Generate a state for each child to store its heuristic value, parent, and grid position
                 State childState = new State(children[i], i);
                 childState.setParent(currentState);
                 boolean onOpen = open.contains(childState);
                 boolean onClosed = closed.contains(childState);
                 if (!onOpen && !onClosed){
                     open.add(childState);
-                    distances.put(childState, currentDistance+1);
+                    distances.put(childState, currentDistance+1); // Set the distance of the child based on the parent
                 } else if (onOpen) {
                     if (distances.get(childState) > currentDistance + 1){
                         open.remove(childState); // .equals() doesn't care about info other than string
@@ -191,71 +213,80 @@ public class Jewels {
                     }
                 } else { // onClosed == true
                     if (distances.get(childState) > currentDistance + 1){
+                        // We've found a shorter route to this state, re-add to open
                         closed.remove(childState);
                         open.add(childState);
                     }
                 }
             }
-            this.totalVisits +=1; //increment counter of visited nodes
             closed.add(currentState);
         }
-        return "Best-First Solution not found.";
+        return new int[]{-1}; // -1 means no solution found
 
     }
 
     // Takes the current state from best first search and returns a string representation of the path
     // from the start state to the current state.
-    private String findPath(State currentState) {
+    private int[] findPath(State currentState) {
+        // Starting from the goal node, positions will be pushed onto the stack
         ArrayDeque<Integer> path = new ArrayDeque<>();
 
         while (currentState.getParent() != null){ // Prevents printing -1 from the start node
             path.push(currentState.pos);
             currentState = currentState.getParent();
         }
-        String positionPath = "";
-        while (!path.isEmpty()){
-            positionPath += path.pop() + " ";
+        int[] positionPath = new int[path.size()];
+        for (int i = 0; i < positionPath.length; i++){
+            // Popping positions off the stack will give the path in the correct order.
+            positionPath[i] = path.pop();
         }
 
         return positionPath;
     }
 
     // Finds a path to the goal node via a depth first search.
-    private String depthFirst() {
+    private int[] depthFirst() {
 
-        ArrayDeque<Integer> route = new ArrayDeque<>();
-        ArrayDeque<String> stack = new ArrayDeque<>();
-        visited.clear();
+        ArrayDeque<Integer> route = new ArrayDeque<>(); // Stack to store the current position route.
+        ArrayDeque<String> stack = new ArrayDeque<>(); // Stack to keep track of the states
+        Set<String> visited = new HashSet<>();
+
         this.totalVisits = 0; //set total number of nodes visited counter to 0
 
         String currentState = startState;
         visited.add(currentState);
+        this.totalVisits += 1;
+
         while (!currentState.equals(endState)){
-            boolean openNodeFound = false;
+
+            boolean openNodeFound = false; // Initially, no children are found
             String[] children = generateChildren(currentState);
             for (int i = 0; i < children.length; i++){
-                if (!visited.contains(children[i])){
-                    this.totalVisits += 1; //increment counter
-                    route.push(i);
-                    stack.push(children[i]);
-                    visited.add(children[i]);
+                if (!visited.contains(children[i])){ // Checking the current state for unvisited children
+                    route.push(i); // The loop counter is the location on the grid that is being "pressed"
+                    stack.push(children[i]); // Need to store the state as well, not just the grid location
+
+                    visited.add(children[i]); // Mark child as visited and set it to be evaluated next loop iteration
                     currentState = children[i];
+
                     openNodeFound = true;
+                    this.totalVisits += 1; //increment counter
                     break;
                 }
             }
-            if (openNodeFound)
+            if (openNodeFound) // If an open child is found, start another loop iteration
                 continue;
 
             if (route.isEmpty())
-                return "No Dept-First solution found.";
+                return new int[]{-1};
 
-            route.pop();
+            route.pop(); // No child found, so back up
             currentState = stack.pop();
         }
-        String soln = "";
-        while (!route.isEmpty()){
-            soln += route.removeLast() + " ";
+
+        int[] soln = new int[route.size()];
+        for (int i = 0; i < soln.length; i++){
+            soln[i] =  route.removeLast();
         }
         return soln;
     }
@@ -282,8 +313,7 @@ public class Jewels {
             this.jewels = jewels;
             this.pos = pos;
 
-            calcHeuristic();
-
+            calculateHeuristic();
         }
 
         // Calculates a heuristic value for a state based on how close each letter is to the goal letter.
@@ -293,7 +323,7 @@ public class Jewels {
         // If the jewel is 2 steps away from the jewel in the goal state, add 2;
         // This amounts to the lowest possible heuristic being 0 (as in the goal state),
         //  or 18 if every jewel is 2 steps away from the final state.
-        private void calcHeuristic(){
+        private void calculateHeuristic(){
             int tmpweight = 0;
             for (int i=0;i<jewels.length();i++) {
                 char c = jewels.charAt(i);
@@ -345,6 +375,7 @@ public class Jewels {
             if (obj == this) {
                 return true;
             } else if (obj instanceof String) {
+                // Want to be able to compare string representations to State objects in a priority queue
                 String s = (String) obj;
                 return jewels.equals(s);
             } else if (obj instanceof State){
