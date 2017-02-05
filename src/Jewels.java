@@ -26,47 +26,77 @@ public class Jewels {
      *
      */
 
-    private HashMap<String, String[]> stateAdjMap;
     private HashSet<String> visited;
 
     private String startState;
     private String endState;
 
+    private int totalVisits = 0;
+
     private static final int[][] jewelChanges = new int[][]{
-        {0,1,3},
-        {0,1,2,4},
-        {1,2,5},
-        {0,3,4,6},
-        {1,3,4,5,7},
-        {2,4,5,8},
-        {3,6,7},
-        {4,6,7,8},
-        {5,7,8},
+            {0,1,3},
+            {0,1,2,4},
+            {1,2,5},
+            {0,3,4,6},
+            {1,3,4,5,7},
+            {2,4,5,8},
+            {3,6,7},
+            {4,6,7,8},
+            {5,7,8},
     };
 
     public Jewels(String startState, String goalState) {
-        stateAdjMap = new HashMap<>();
         visited = new HashSet<>();
         this.startState = startState;
         this.endState = goalState;
     }
 
     public static void main(String[] args){
-        //System.out.println("Hello World!");
 
-        String startState = "DDDDDDDDD";
-        String goalState = "RRERERERR";
+        String startState = "DDDDDDDDD"; //Test 1
+        String goalState = "EERERERER";
 
         Jewels j = new Jewels(startState, goalState);
-        j.generate();
 
         String dfSolution = j.depthFirst();
         System.out.println("Depth First: " + dfSolution );
         simulate(startState, goalState, dfSolution);
+        System.out.println("Total visits: " + j.totalVisits);
 
         String bfSolution = j.bestFirst();
         System.out.println("Best First: " + bfSolution);
         simulate(startState, goalState, bfSolution);
+        System.out.println("Total visits: " + j.totalVisits);
+
+        startState = "DDDDDDDDD"; //Test 2
+        goalState =  "RRERERERR";
+
+        j = new Jewels(startState, goalState);
+
+        dfSolution = j.depthFirst();
+        System.out.println("Depth First: " + dfSolution );
+        simulate(startState, goalState, dfSolution);
+        System.out.println("Total visits: " + j.totalVisits);
+
+        bfSolution = j.bestFirst();
+        System.out.println("Best First: " + bfSolution);
+        simulate(startState, goalState, bfSolution);
+        System.out.println("Total visits: " + j.totalVisits);
+
+        startState = "DDDDDDDDD"; //Test 3
+        goalState =  "RDRDRDRDR";
+
+        j = new Jewels(startState, goalState);
+
+        dfSolution = j.depthFirst();
+        System.out.println("Depth First: " + dfSolution );
+        simulate(startState, goalState, dfSolution);
+        System.out.println("Total visits: " + j.totalVisits);
+
+        bfSolution = j.bestFirst();
+        System.out.println("Best First: " + bfSolution);
+        simulate(startState, goalState, bfSolution);
+        System.out.println("Total visits: " + j.totalVisits);
 
     }
 
@@ -93,24 +123,6 @@ public class Jewels {
         }
 
         return sb.toString();
-    }
-
-    // Generates all possible states
-    public void generate() {
-        ArrayDeque<String> openQueue = new ArrayDeque<>();
-        openQueue.add(startState);
-
-        while (!openQueue.isEmpty()) {
-
-            String stateToEval = openQueue.remove();
-            if (!stateAdjMap.containsKey(stateToEval)) {
-                String[] children = generateChildren(stateToEval);
-                Collections.addAll(openQueue, children);
-                stateAdjMap.put(stateToEval, children);
-            }
-        }
-        //System.out.println(stateAdjMap.size());
-        //System.out.println(Arrays.toString(stateAdjMap.get(startState)));
     }
 
     // Returns the character that the given character will change to with one move
@@ -150,6 +162,7 @@ public class Jewels {
         PriorityQueue<State> open = new PriorityQueue<>(new HeuristicComp());
         HashSet<State> closed = new HashSet<>();
         HashMap<State, Integer> distances = new HashMap<>();
+        this.totalVisits = 0; //set total number of nodes visited counter to 0
 
         State currentState = new State(startState, -1);
         open.add(currentState);
@@ -161,7 +174,7 @@ public class Jewels {
             int currentDistance = distances.get(currentState);
             if (currentState.equals(endState)) return findPath(currentState);
 
-            String[] children = stateAdjMap.get(currentState.jewels);
+            String[] children = generateChildren(currentState.jewels);
 
             for (int i = 0; i < children.length; i++){
                 State childState = new State(children[i], i);
@@ -183,6 +196,7 @@ public class Jewels {
                     }
                 }
             }
+            this.totalVisits +=1; //increment counter of visited nodes
             closed.add(currentState);
         }
         return "Best-First Solution not found.";
@@ -212,14 +226,16 @@ public class Jewels {
         ArrayDeque<Integer> route = new ArrayDeque<>();
         ArrayDeque<String> stack = new ArrayDeque<>();
         visited.clear();
+        this.totalVisits = 0; //set total number of nodes visited counter to 0
 
         String currentState = startState;
         visited.add(currentState);
         while (!currentState.equals(endState)){
             boolean openNodeFound = false;
-            String[] children = stateAdjMap.get(currentState);
+            String[] children = generateChildren(currentState);
             for (int i = 0; i < children.length; i++){
                 if (!visited.contains(children[i])){
+                    this.totalVisits += 1; //increment counter
                     route.push(i);
                     stack.push(children[i]);
                     visited.add(children[i]);
@@ -279,8 +295,7 @@ public class Jewels {
         //  or 18 if every jewel is 2 steps away from the final state.
         private void calcHeuristic(){
             int tmpweight = 0;
-            for (int i=0;i<jewels.length();i++)
-            {
+            for (int i=0;i<jewels.length();i++) {
                 char c = jewels.charAt(i);
                 switch (c) {
                     case 'D':
