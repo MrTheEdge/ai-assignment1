@@ -63,12 +63,10 @@ public class Jewels {
 
         int[] dfSolution = j.depthFirst();
         System.out.println("DFS Solution: " + Arrays.toString(dfSolution));
-        //simulate(startState, goalState, dfSolution);
         System.out.println("Total DFS Visits: " + j.totalVisits);
 
         int[] bfSolution = j.bestFirst();
         System.out.println("BestFS Solution: " + Arrays.toString(bfSolution));
-        //simulate(startState, goalState, bfSolution);
         System.out.println("Total BestFS Visits: " + j.totalVisits);
         System.out.println();
 
@@ -86,12 +84,10 @@ public class Jewels {
 
         dfSolution = j.depthFirst();
         System.out.println("DFS Solution: " + Arrays.toString(dfSolution));
-        //simulate(startState, goalState, dfSolution);
         System.out.println("Total DFS Visits: " + j.totalVisits);
 
         bfSolution = j.bestFirst();
         System.out.println("BestFS Solution: " + Arrays.toString(bfSolution));
-        //simulate(startState, goalState, bfSolution);
         System.out.println("Total BestFS Visits: " + j.totalVisits);
         System.out.println();
 
@@ -109,25 +105,13 @@ public class Jewels {
 
         dfSolution = j.depthFirst();
         System.out.println("DFS Solution: " + Arrays.toString(dfSolution));
-        //simulate(startState, goalState, dfSolution);
         System.out.println("Total DFS Visits: " + j.totalVisits);
 
         bfSolution = j.bestFirst();
         System.out.println("BestFS Solution: " + Arrays.toString(bfSolution));
-        //simulate(startState, goalState, bfSolution);
         System.out.println("Total BestFS Visits: " + j.totalVisits);
         System.out.println();
 
-    }
-
-    // Used as a test to see if the result from DFS and BestFS actually solve the puzzle.
-    public static void simulate(String startState, String goalState, int[] solution){
-        // Simulating the found path to test if the result is correct.
-        String currentState = startState;
-        for (int i = 0; i < solution.length; i++){
-            currentState = apply(currentState, solution[i]);
-        }
-        System.out.println("Simulated: " + currentState + " Expected: " + goalState + " Equal?: " + currentState.equals(goalState));
     }
 
     // Takes a state as a string and applies a move corresponding to the given position.
